@@ -1,0 +1,364 @@
+# importando dependencias do tkinter
+from tkinter.ttk import *
+from tkinter import*
+from tkinter import ttk
+from tkinter import messagebox
+from tkinter import filedialog as fd
+
+#import pillow
+from PIL import ImageTk, Image
+
+#tk calendario
+from tkcalendar import Calendar, DateEntry
+from datetime import date
+
+#importando main
+from main import *
+
+#cores
+co0 = "#2e2d2b"  # Preta
+co1 = "#feffff"  # Branca   
+co2 = "#e5e5e5"  # grey
+co3 = "#00a095"  # Verde
+co4 = "#403d3d"   # letra
+co6 = "#003452"   # azul
+co7 = "#ef5350"   # vermelha
+
+co6 = "#146C94"   # azul
+co8 = "#263238"   # + verde
+co9 = "#e9edf5"   # + verde
+
+
+#criando janela
+janela = Tk()
+janela.title("")
+janela.geometry('810x535')
+janela.configure(background=co1)
+janela.resizable(width=FALSE, height=FALSE)
+
+style = Style(janela)
+style.theme_use("clam")
+
+#criando frames
+frame_logo = Frame(janela, width=850, height=52, bg=co6)
+frame_logo.grid(row=0, column=0, pady=0, padx=0, sticky=NSEW, columnspan=5)
+
+frame_botoes = Frame(janela, width=100, height=200, bg=co1, relief=RAISED)
+frame_botoes.grid(row=1, column=0, pady=1, padx=0, sticky=NSEW,)
+
+frame_detalhes = Frame(janela, width=800, height=100, bg=co1, relief=SOLID)
+frame_detalhes.grid(row=1, column=1, pady=1, padx=10, sticky=NSEW,)
+
+frame_tabela = Frame(janela, width=800, height=100, bg=co1)
+frame_tabela.grid(row=3, column=0, pady=0, padx=10, sticky=NSEW, columnspan=5)
+
+#trabalhando no frame novo
+global imagem, imagem_string, l_image
+
+app_lg = Image.open(r'C:\Users\Samue\OneDrive\Documentos\miniProjetosPython\cadastro\logo.png')
+app_lg = app_lg.resize((50,50))
+app_lg = ImageTk.PhotoImage(app_lg)
+app_logo = Label(frame_logo, image=app_lg, text=" Sistema de registro de alunos", width=850, compound=LEFT, anchor=NW, font=("verdana 15" ), bg=co6, fg=co1 )
+app_logo.place(x=5, y=0)
+
+#abrindo imagem
+imagem = Image.open(r'C:\Users\Samue\OneDrive\Documentos\miniProjetosPython\cadastro\logo.png')
+imagem = imagem.resize((130, 130))
+imagem = ImageTk.PhotoImage(imagem)
+app_logo = Label(frame_detalhes, image=imagem, bg=co1, fg=co4)
+app_logo.place(x=390, y=10)
+
+#criando funções para CRUD
+
+#função adcicionar
+def adicionar():
+    global imagem, imagem_string, l_image
+    #obtendo os valores
+    nome = e_nome.get()
+    email = e_email.get()
+    tel = e_telefone.get()
+    sexo = c_sexo.get()
+    data =  data_nascimento.get()
+    endereco = e_endereco.get()
+    curso = c_curso.get()
+    img = imagem_string
+
+    lista = [ nome, email, tel, sexo, data, endereco, curso, img]
+
+    #ferificando se tem erros na lista
+    for i in lista:
+        if i=='':
+            messagebox.showerror('Erro', 'Preencha todos os campos obrigatórios')
+            return
+
+    #registrando os valores 
+    sistema_de_registro.register_student(lista)
+    #limpando os campos
+    e_nome.delete(0, 'end')
+    e_email.delete(0, 'end')
+    e_telefone.delete(0, 'end')
+    c_sexo.delete(0, 'end')
+    data_nascimento.delete(0, 'end')
+    e_endereco.delete(0, 'end')
+    c_curso.delete(0, 'end')
+    l_image.config(image='')
+
+    #mostrando valores da tabela
+    mostrar_aluno()
+
+#procuraraluno função
+def procurar():
+    global imagem, imagem_string, l_image
+
+    # obtendo o id
+    id_aluno = int(e_procurar.get())
+
+    # chamar a função procurando por aluno
+    dados = sistema_de_registro.search_student(id_aluno)
+
+    #limpando os campos
+    e_nome.delete(0, 'end')
+    e_email.delete(0, 'end')
+    e_telefone.delete(0, 'end')
+    c_sexo.delete(0, 'end')
+    data_nascimento.delete(0, 'end')
+    e_endereco.delete(0, 'end')
+    c_curso.delete(0, 'end')
+
+    #inserir os valores dos campos de entrada
+    e_nome.insert('end', dados[1])
+    e_email.insert('end', dados[2])
+    e_telefone.insert('end', dados[3])
+    c_sexo.insert('end', dados[4])
+    data_nascimento.insert('end', dados[5])
+    e_endereco.insert('end', dados[6])
+    c_curso.insert('end', dados[7])
+
+    imagem = dados[8]
+    imagem_string = imagem
+    imagem = Image.open(imagem)
+    imagem = imagem.resize((130, 130))
+    imagem = ImageTk.PhotoImage(imagem)
+
+    app_logo = Label(frame_detalhes, image=imagem, bg=co1, fg=co4)
+    app_logo.place(x=390, y=10)
+
+#atualizar pagina
+def atualizar():
+    global imagem, imagem_string
+    #obitendo id
+    id_aluno = int(e_procurar.get())
+
+    nome = e_nome.get()
+    email = e_email.get()
+    tel = e_telefone.get()
+    sexo = c_sexo.get()
+    data =  data_nascimento.get()
+    endereco = e_endereco.get()
+    curso = c_curso.get()
+    img = imagem_string
+
+    lista = [ nome, email, tel, sexo, data, endereco, curso, img, id_aluno]
+
+    #ferificando se tem erros na lista
+    for i in lista:
+        if i=='':
+            messagebox.showerror('Erro', 'Preencha todos os campos obrigatórios')
+            return
+
+    #registrando os valores 
+    sistema_de_registro.update_student(lista)
+    #limpando os campos
+    e_nome.delete(0, 'end')
+    e_email.delete(0, 'end')
+    e_telefone.delete(0, 'end')
+    c_sexo.delete(0, 'end')
+    data_nascimento.delete(0, 'end')
+    e_endereco.delete(0, 'end')
+    c_curso.delete(0, 'end')
+
+    #abrindo imagem
+    imagem = Image.open(r'C:\Users\Samue\OneDrive\Documentos\miniProjetosPython\cadastro\logo.png')
+    imagem = imagem.resize((130, 130))
+    imagem = ImageTk.PhotoImage(imagem)
+
+    app_logo = Label(frame_detalhes, image=imagem, bg=co1, fg=co4)
+    app_logo.place(x=390, y=10)
+
+    #mostrando valores da tabela
+    mostrar_aluno()
+
+def deletar():
+    global imagem, imagem_string
+    #obitendo id
+    id_aluno = int(e_procurar.get())
+
+    #deletando o aluno 
+    sistema_de_registro.delete_student(id_aluno)
+
+    #limpando os campos
+    e_nome.delete(0, 'end')
+    e_email.delete(0, 'end')
+    e_telefone.delete(0, 'end')
+    c_sexo.delete(0, 'end')
+    data_nascimento.delete(0, 'end')
+    e_endereco.delete(0, 'end')
+    c_curso.delete(0, 'end')
+
+    e_procurar.delete(0, 'end')
+
+    #abrindo imagem
+    imagem = Image.open(r'C:\Users\Samue\OneDrive\Documentos\miniProjetosPython\cadastro\logo.png')
+    imagem = imagem.resize((130, 130))
+    imagem = ImageTk.PhotoImage(imagem)
+
+    app_logo = Label(frame_detalhes, image=imagem, bg=co1, fg=co4)
+    app_logo.place(x=390, y=10)
+
+    #mostrando valores da tabela
+    mostrar_aluno()
+
+# criando os campos de entrada
+l_nome =Label(frame_detalhes, text="none *", anchor=NW, font=('ivy 10'),bg=co1, fg=co4)
+l_nome.place(x=4, y=10)
+e_nome = Entry(frame_detalhes, width=30, justify="left", relief=SOLID)
+e_nome.place(x=7, y=40)
+
+l_email =Label(frame_detalhes, text="email *", anchor=NW, font=('ivy 10'),bg=co1, fg=co4)
+l_email.place(x=4, y=70)
+e_email = Entry(frame_detalhes, width=30, justify="left", relief=SOLID)
+e_email.place(x=7, y=100)
+
+
+l_telefone =Label(frame_detalhes, text="Telefone *", anchor=NW, font=('ivy 10'),bg=co1, fg=co4)
+l_telefone.place(x=4, y=130)
+e_telefone = Entry(frame_detalhes, width=15, justify="left", relief=SOLID)
+e_telefone.place(x=7, y=160)
+
+
+l_sexo =Label(frame_detalhes, text="Sexo *", anchor=NW, font=('ivy 10'),bg=co1, fg=co4)
+l_sexo.place(x=127, y=130)
+c_sexo = ttk.Combobox(frame_detalhes, width=7, font=('ivy 8'), justify='center')
+c_sexo['values'] = ('M', 'F', 'T')
+c_sexo.place(x=130, y=160)
+
+l_data_nascimento =Label(frame_detalhes, text="Data de nascimento *", anchor=NW, font=('ivy 10'),bg=co1, fg=co4)
+l_data_nascimento.place(x=220, y=10)
+data_nascimento = DateEntry(frame_detalhes, width=18, justify='center', backgroud='darkblue', foreground='with', borderwidth=2, year=2023)
+data_nascimento.place(x=224, y=40)
+
+l_endereco =Label(frame_detalhes, text="Endereço *", anchor=NW, font=('ivy 10'),bg=co1, fg=co4)
+l_endereco.place(x=220, y=70)
+e_endereco = Entry(frame_detalhes, width=15, justify="left", relief=SOLID)
+e_endereco.place(x=224, y=100)
+
+cursos = ['Engenharia', 'Medicina', 'TI']
+
+l_curso =Label(frame_detalhes, text="Curso *", anchor=NW, font=('ivy 10'),bg=co1, fg=co4)
+l_curso.place(x=220, y=130)
+c_curso = ttk.Combobox(frame_detalhes, width=7, font=('ivy 8'), justify='center')
+c_curso['values'] = (cursos)
+c_curso.place(x=224, y=160)
+
+#função para escolher imagem
+def escolher_imagem():
+    global imagem, imagem_string, l_image
+    imagem = fd.askopenfilename()
+    imagem_string = imagem
+
+    imagem = Image.open(imagem)
+    imagem = imagem.resize((130, 130))
+    imagem = ImageTk.PhotoImage(imagem)
+    app_logo = Label(frame_detalhes, image=imagem, bg=co1, fg=co4)
+    app_logo.place(x=390, y=10)
+
+# Corrigido: crie o botão antes de tentar alterar sua propriedade
+botao_carregar = Button(frame_detalhes, command=escolher_imagem, text="TROCAR DE FOTO", width=20, compound=CENTER, anchor=CENTER, overrelief=RIDGE, font=('ivy 7 bold'), bg=co1, fg=co0)
+botao_carregar.place(x=390, y=160)
+
+# criando tabela
+def mostrar_aluno():
+    # criando a treeview com duas barras de rolagem
+    list_header = ['Id', 'Nome', 'Email', 'Telefone', 'Sexo', 'Data', 'Endereço', 'Curso']
+
+    # visualizar todos os alunos
+    df_list = sistema_de_registro.view_all_students()
+
+    tree_aluno = ttk.Treeview(frame_tabela, selectmode="extended", columns=list_header, show="headings")
+
+    # barra de rolagem vertical
+    vsb = ttk.Scrollbar(frame_tabela, orient="vertical", command=tree_aluno.yview)
+    # barra de rolagem horizontal
+    hsb = ttk.Scrollbar(frame_tabela, orient="horizontal", command=tree_aluno.xview)
+
+    tree_aluno.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
+    tree_aluno.grid(column=0, row=1, sticky=NSEW)
+    vsb.grid(column=1, row=1, sticky=NS)
+    hsb.grid(column=0, row=2, sticky=EW)
+    frame_tabela.grid_rowconfigure(0, weight=12)
+
+    hd = ["nw", 'nw', 'nw', 'center', 'center', 'center', 'center', 'center']
+    h = [40, 150, 150, 70, 70, 70, 120, 100, 100]
+    n = 0
+
+    for col in list_header:
+        tree_aluno.heading(col, text=col.title(), anchor=CENTER)
+        tree_aluno.column(col, width=h[n], anchor=hd[n])
+        n += 1
+
+    for item in df_list:
+        tree_aluno.insert('', 'end', values=item)
+
+
+# procurar aluno 
+frame_procurar = Frame(frame_botoes, width=40, height=55, bg=co1, relief=RAISED)
+frame_procurar.grid(row=0, column=0, pady=10, padx=10, sticky=NSEW)
+
+l_nome =Label(frame_procurar, text=" Procurar aluno  [Entra ID]", anchor=NW, font=('ivy 10'),bg=co1, fg=co4)
+l_nome.grid(row=0, column=0, pady=10, padx=0, sticky=NSEW)
+e_procurar = Entry(frame_procurar, width=5, justify="center", relief=SOLID, font=('ivy 10'))
+e_procurar.grid(row=1, column=0, pady=10, padx=0, sticky=NSEW)
+
+
+botao_procurar = Button(frame_procurar, command=procurar, text="Procurar", width=9, anchor=CENTER, overrelief=RIDGE, font=('ivy 7 bold'), bg=co1, fg=co0)
+botao_procurar.grid(row=1, column=1, pady=10, padx=0, sticky=NSEW)
+
+#botoes
+app_img_adicionar = Image.open(r'C:\Users\Samue\OneDrive\Documentos\miniProjetosPython\cadastro\mais.png')
+app_img_adicionar = app_img_adicionar.resize((25,25))
+app_img_adicionar = ImageTk.PhotoImage(app_img_adicionar)
+app_adicionar = Button(frame_botoes, command=adicionar, image=app_img_adicionar, relief=GROOVE, text=" Adicionar", width=100, compound=LEFT, overrelief=RIDGE, font=('ivy 11'), bg=co1, fg=co0)
+app_adicionar.grid(row=1, column=0, pady=5, padx=10, sticky=NSEW)
+
+app_img_atualizar = Image.open(r'C:\Users\Samue\OneDrive\Documentos\miniProjetosPython\cadastro\atualizar.png')
+app_img_atualizar = app_img_atualizar.resize((25,25))
+app_img_atualizar = ImageTk.PhotoImage(app_img_atualizar)
+app_atualizar = Button(frame_botoes, command=atualizar, image=app_img_atualizar, relief=GROOVE, text=" Atualizar", width=100, compound=LEFT, overrelief=RIDGE, font=('ivy 11'), bg=co1, fg=co0)
+app_atualizar.grid(row=2, column=0, pady=5, padx=10, sticky=NSEW)
+
+app_img_excluir = Image.open(r'C:\Users\Samue\OneDrive\Documentos\miniProjetosPython\cadastro\excluir.png')
+app_img_excluir = app_img_excluir.resize((25,25))
+app_img_excluir = ImageTk.PhotoImage(app_img_excluir)
+app_excluir = Button(frame_botoes, command=deletar, image=app_img_excluir, relief=GROOVE, text=" Deletar", width=100, compound=LEFT, overrelief=RIDGE, font=('ivy 11'), bg=co1, fg=co0)
+app_excluir.grid(row=3, column=0, pady=5, padx=10, sticky=NSEW)
+
+l_linha= Label(frame_botoes, relief=GROOVE, text=" h", width=1, height=123, font=('ivy 1'), bg=co1, fg=co0)
+l_linha.place(x=240, y=15)
+
+# chamar tabela
+mostrar_aluno()
+
+
+# executar a janela
+janela.mainloop()
+
+
+
+
+
+
+
+
+
+
+
